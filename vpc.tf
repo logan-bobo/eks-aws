@@ -44,3 +44,7 @@ resource "aws_subnet" "private" {
   cidr_block        = each.value.cidr
   availability_zone = "${local.default_region}${each.value.az}"
 }
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+}
