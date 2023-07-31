@@ -23,7 +23,6 @@ locals {
       }
     }
   }
-
 }
 
 resource "aws_vpc" "main" {
@@ -50,6 +49,22 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 }
 
+resource "aws_eip" "main" {
+  for_each = local.subnets.public
+
+  domain     = "vpc"
+  depends_on = [aws_internet_gateway.main]
+}
+
+resource "aws_nat_gateway" "main" {
+  for_each = local.subnets.public
+
+  allocation_id = aws_eip.main[each.key].id
+  subnet_id     = aws_subnet.public[each.key].id
+
+  depends_on = [aws_internet_gateway.main]
+}
+
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 }
@@ -68,5 +83,22 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
+  for_each = local.subnets.private
+
   vpc_id = aws_vpc.main.id
+}
+
+resource "aws_route" "private_ngw" {
+  for_each = local.subnets.private
+
+  route_table_id         = aws_route_table.private[each.key].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.main[each.key].id
+}
+
+resource "aws_route_table_association" "private" {
+  for_each = local.subnets.private
+
+  subnet_id      = aws_subnet.private[each.key].id
+  route_table_id = aws_route_table.private[each.key].id
 }
