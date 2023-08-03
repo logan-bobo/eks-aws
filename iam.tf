@@ -1,4 +1,4 @@
-# cluster role resources
+# controll plane resources
 data "aws_iam_policy_document" "eks_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -25,7 +25,7 @@ data "aws_iam_policy" "eks_cluster_policy" {
   arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# node group resoures
+# data plane resources
 locals {
   node_group_policies = {
     amazoneks_cni_policy                         = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
@@ -63,5 +63,3 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
   role       = aws_iam_role.eks_node_group.name
   policy_arn = data.aws_iam_policy.eks_node_group_policy[each.key].arn
 }
-
-
