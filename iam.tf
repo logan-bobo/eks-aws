@@ -63,3 +63,55 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
   role       = aws_iam_role.eks_node_group.name
   policy_arn = data.aws_iam_policy.eks_node_group_policy[each.key].arn
 }
+
+# EKS connector 
+data "aws_iam_policy_document" "eks_connector_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ssm.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "eks_connector_agent" {
+  statement {
+    sid = "SsmControlChannel"
+    effect = "Allow"
+
+    actions = [
+      "ssmmessages:CreateControlChannel",
+    ]
+
+    resources = [
+      "arn:aws:eks:*:*:cluster/*",
+    ]
+  }
+  statement {
+    sid = "ssmDataplaneOperations"
+    effect = "Allow"
+
+    actions = [
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenDataChannel",
+      "ssmmessages:OpenControlChannel",
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "eks_connector_agent" {
+  name   = "AmazonEKSConnectorAgentPolicy"
+  policy = data.aws_iam_policy_document.eks_connector_agent.json
+}
+
+resource "aws_iam_role" "eks_connector_agent" {
+  name                  = "AmazonEKSConnectorAgentRole"
+  force_detach_policies = true
+  assume_role_policy    = data.aws_iam_policy_document.eks_assume_role_policy.json
+}
