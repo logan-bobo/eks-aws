@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "eks_connector_assume_role_policy" {
 
 data "aws_iam_policy_document" "eks_connector_agent" {
   statement {
-    sid = "SsmControlChannel"
+    sid    = "SsmControlChannel"
     effect = "Allow"
 
     actions = [
@@ -90,7 +90,7 @@ data "aws_iam_policy_document" "eks_connector_agent" {
     ]
   }
   statement {
-    sid = "ssmDataplaneOperations"
+    sid    = "ssmDataplaneOperations"
     effect = "Allow"
 
     actions = [

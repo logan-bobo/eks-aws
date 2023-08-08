@@ -27,8 +27,8 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "example"
   node_role_arn   = aws_iam_role.eks_node_group.arn
-  subnet_ids      = [for _, v in aws_subnet.private: v.id]
-  capacity_type = "SPOT"
+  subnet_ids      = [for _, v in aws_subnet.private : v.id]
+  capacity_type   = "SPOT"
 
   scaling_config {
     desired_size = 1
@@ -83,8 +83,8 @@ resource "aws_iam_role" "eks_cluster_oidc" {
 
 # addons 
 module "eks_blueprints_addons" {
-  source = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.5" 
+  source  = "aws-ia/eks-blueprints-addons/aws"
+  version = "~> 1.5"
 
   cluster_name      = aws_eks_cluster.main.name
   cluster_endpoint  = aws_eks_cluster.main.endpoint
@@ -106,5 +106,6 @@ module "eks_blueprints_addons" {
     }
   }
 
-  enable_argocd = true
+  enable_argocd         = true
+  enable_metrics_server = true
 }
