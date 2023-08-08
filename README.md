@@ -7,6 +7,7 @@ Objectives:
  - [x] Enable adons, aws-ebs-csi-driver, coredns, vpc-cni and kube-proxy
  - [x] Bootstrap the EKS cluster with ArgoCD using EKS blueprints
  - [x] Deploy metric server for Kube
- - [ ] Deploy Nginx to the cluster via ArgoCD
- - [ ] Implement HPA for the Nginx deployment 
- - [ ] Expose Nginx via Ingres/Service that uses AWS ALB
+ - [x] Deploy [nginx-app](https://github.com/logan-bobo/kube_nginx) to the cluster via ArgoCD
+ - [ ] Expose nginx-app via Ingres/Service that uses AWS ALB
+ - [ ] Implement HPA for the nginx-app deployment 
+ - [ ] Expose nginx-app via Ingres/Service that uses AWS ALB
