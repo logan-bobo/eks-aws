@@ -105,4 +105,6 @@ module "eks_blueprints_addons" {
       most_recent = true
     }
   }
+
+  enable_argocd = true
 }
