@@ -1,7 +1,6 @@
-
 # controll plane resources
 resource "aws_eks_cluster" "main" {
-  name     = "example"
+  name     = "main"
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
@@ -24,7 +23,6 @@ output "kubeconfig-certificate-authority-data" {
 }
 
 # data plane resources
-
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "example"
@@ -47,4 +45,64 @@ resource "aws_eks_node_group" "main" {
   depends_on = [
     data.aws_iam_policy.eks_node_group_policy
   ]
+}
+
+# oidc
+data "tls_certificate" "eks_cluster_oidc_tls" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks_cluster_oidc" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.eks_cluster_oidc_tls.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.eks_cluster_oidc_tls.url
+}
+
+data "aws_iam_policy_document" "eks_cluster_oidc_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_cluster_oidc.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-node"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks_cluster_oidc.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "eks_cluster_oidc" {
+  assume_role_policy = data.aws_iam_policy_document.eks_cluster_oidc_assume_role_policy.json
+  name               = "EKSClusterOIDC"
+}
+
+# addons 
+module "eks_blueprints_addons" {
+  source = "aws-ia/eks-blueprints-addons/aws"
+  version = "~> 1.5" 
+
+  cluster_name      = aws_eks_cluster.main.name
+  cluster_endpoint  = aws_eks_cluster.main.endpoint
+  cluster_version   = aws_eks_cluster.main.version
+  oidc_provider_arn = aws_iam_openid_connect_provider.eks_cluster_oidc.arn
+
+  eks_addons = {
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+    coredns = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+  }
 }
