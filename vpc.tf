@@ -35,6 +35,10 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = each.value.cidr
   availability_zone = "${local.default_region}${each.value.az}"
+
+  tags = {
+    "kubernetes.io/role/elb" = "1"
+  }
 }
 
 resource "aws_subnet" "private" {
