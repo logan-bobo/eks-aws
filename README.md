@@ -10,3 +10,4 @@ Objectives:
  - [x] Deploy [nginx-app](https://github.com/logan-bobo/kube_nginx) to the cluster via ArgoCD
  - [x] Expose nginx-app via Ingres/Service that uses AWS ALB
  - [x] Implement HPA for the nginx-app deployment 
+ - [ ] Bootstrap ArgoCD projects in the future when its avalible via EKS blueprints
