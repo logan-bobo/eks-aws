@@ -9,4 +9,4 @@ Objectives:
  - [x] Deploy metric server for Kube
  - [x] Deploy [nginx-app](https://github.com/logan-bobo/kube_nginx) to the cluster via ArgoCD
  - [x] Expose nginx-app via Ingres/Service that uses AWS ALB
- - [ ] Implement HPA for the nginx-app deployment 
+ - [x] Implement HPA for the nginx-app deployment 
